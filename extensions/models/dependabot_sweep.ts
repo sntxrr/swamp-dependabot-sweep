@@ -291,6 +291,18 @@ async function searchDependabotPrs(
       globalArgs,
     );
 
+    // A 200 carrying an unexpected shape would otherwise surface as
+    // "Cannot read properties of undefined (reading 'length')" several frames
+    // from the request that caused it. Checking here means the error names the
+    // endpoint that lied.
+    if (!Array.isArray(body?.items) || typeof body?.total_count !== "number") {
+      throw new Error(
+        `GitHub search returned 200 with an unexpected shape from ${url} — ` +
+          `expected {total_count: number, items: array}, got keys ` +
+          `[${Object.keys(body ?? {}).join(", ")}].`,
+      );
+    }
+
     reportedTotal = body.total_count;
     items.push(...body.items);
 
@@ -412,6 +424,11 @@ export const model = {
         const now = new Date();
         const base = globalArgs.apiBaseUrl.replace(/\/+$/, "");
 
+        logger.info(
+          "Sweeping {ownerType} {owner} for open Dependabot pull requests",
+          { ownerType: globalArgs.ownerType, owner: globalArgs.owner },
+        );
+
         const { items, reportedTotal, truncated } = await searchDependabotPrs(
           globalArgs,
         );
@@ -455,10 +472,29 @@ export const model = {
           // sweep — the other twenty are still worth reporting.
           let meta: RepositoryMetadata | null = null;
           try {
-            meta = await githubGet<RepositoryMetadata>(
+            const payload = await githubGet<Partial<RepositoryMetadata>>(
               `${base}/repos/${fullName}`,
               globalArgs,
             );
+            // Left as null rather than trusted when the flags are missing. A
+            // partial payload would otherwise read as fork=false,
+            // archived=false and classify `active` — asserting the repository
+            // is alive on the strength of fields that were never there.
+            // `unknown` says what actually happened.
+            meta = typeof payload?.fork === "boolean" &&
+                typeof payload?.archived === "boolean"
+              ? {
+                fork: payload.fork,
+                archived: payload.archived,
+                pushed_at: payload.pushed_at ?? null,
+              }
+              : null;
+            if (meta === null) {
+              logger.warn(
+                "Repository payload for {repo} lacked fork/archived flags; classifying it unknown rather than guessing",
+                { repo: fullName },
+              );
+            }
           } catch (cause) {
             logger.warn(
               "Could not read metadata for {repo}; reporting it as live/unknown so it is not silently dropped: {error}",

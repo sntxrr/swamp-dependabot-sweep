@@ -12,3 +12,8 @@
 .claude/scheduled_tasks.lock
 .claude/scheduled_tasks.json
 # END swamp managed section
+
+# Adversarial review reports are content-hash bound to a specific build, so a
+# committed one is stale the moment any source changes. Regenerate with
+# SWAMP_EXTENSION_REVIEW_DIR=.review swamp extension push --dry-run.
+.review/
