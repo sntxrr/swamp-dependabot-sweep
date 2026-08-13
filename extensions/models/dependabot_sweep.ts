@@ -125,9 +125,15 @@ const RepositorySchema = z.object({
 
 const SweepSchema = z.object({
   owner: z.string(),
-  totalPrs: z.number().int().describe("Open Dependabot PRs found across all repositories"),
-  livePrs: z.number().int().describe("PRs on repositories classified live — the review queue"),
-  abandonedPrs: z.number().int().describe("PRs on archived, forked, stale, or denylisted repositories"),
+  totalPrs: z.number().int().describe(
+    "Open Dependabot PRs found across all repositories",
+  ),
+  livePrs: z.number().int().describe(
+    "PRs on repositories classified live — the review queue",
+  ),
+  abandonedPrs: z.number().int().describe(
+    "PRs on archived, forked, stale, or denylisted repositories",
+  ),
   liveRepos: z.number().int(),
   abandonedRepos: z.number().int(),
   // A sweep that quietly returned a slice would read identically to a complete
@@ -438,7 +444,11 @@ export const model = {
         let liveRepos = 0;
         let abandonedRepos = 0;
 
-        for (const [repo, prs] of [...byRepo].sort((a, b) => a[0].localeCompare(b[0]))) {
+        for (
+          const [repo, prs] of [...byRepo].sort((a, b) =>
+            a[0].localeCompare(b[0])
+          )
+        ) {
           const fullName = `${globalArgs.owner}/${repo}`;
 
           // One repository's metadata being unavailable must not abort the
