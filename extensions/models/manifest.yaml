@@ -1,0 +1,20 @@
+manifestVersion: 1
+
+name: "@sntxrr/dependabot-sweep"
+version: "2026.08.13.1"
+description: "Sweep an owner's repositories for open Dependabot pull requests and split the review queue from the abandoned-repo noise"
+repository: "https://github.com/sntxrr/swamp-dependabot-sweep"
+
+models:
+  - dependabot_sweep.ts
+
+additionalFiles:
+  - README.md
+  - LICENSE.md
+
+labels:
+  - github
+  - dependabot
+  - dependencies
+  - security
+  - triage

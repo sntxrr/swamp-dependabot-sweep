@@ -1,0 +1,11 @@
+type: '@sntxrr/dependabot-sweep'
+typeVersion: 2026.08.13.1
+id: fbeaaa4c-d4be-48c5-9c55-1af70aa8b2e6
+name: dependabot
+version: 1
+tags: {}
+globalArguments:
+  owner: sntxrr
+  ownerType: user
+  token: '${{ env.GITHUB_TOKEN }}'
+methods: {}
